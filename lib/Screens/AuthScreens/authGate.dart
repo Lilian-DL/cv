@@ -2,10 +2,16 @@ import 'package:cv/Screens/Home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterfire_ui/auth.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
-class AuthGate extends StatelessWidget {
-  const AuthGate({Key? key}) : super(key: key);
+class AuthGate extends StatefulWidget {
+  AuthGate({Key? key}) : super(key: key);
 
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -15,20 +21,11 @@ class AuthGate extends StatelessWidget {
         if (!snapshot.hasData) {
           return SignInScreen(
               sideBuilder: (context, constraints) {
-                return Padding(
-                  padding: const EdgeInsets.all(20),
+                return const Padding(
+                  padding: EdgeInsets.all(20),
                   child: AspectRatio(
                     aspectRatio: 1,
-                    child: Image.asset('assets/images/MyCV.png'),
-                  ),
-                );
-              },
-              headerBuilder: (context, constraints, _) {
-                return Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.asset('assets/images/MyCV.png'),
+                    child: Image(image: AssetImage('images/MyCV.jpg')),
                   ),
                 );
               },

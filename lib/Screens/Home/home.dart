@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:url_launcher/url_launcher.dart';
@@ -25,16 +27,64 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> _signOut() async {
+      await FirebaseAuth.instance.signOut();
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title), actions: <Widget>[
+        IconButton(
+          icon: const Icon(Icons.logout_outlined),
+          onPressed: () {
+            _signOut();
+          },
+        ),
+      ]),
       body: Center(
-        child: ElevatedButton(
-          child: const Text('Download my CV !'),
-          onPressed: _viewFile,
+        child: Column(
+          children: [
+            const Padding(padding: EdgeInsets.all(10.0)),
+            const InfoUser(),
+            const Padding(padding: EdgeInsets.all(10.0)),
+            ElevatedButton(
+              child: const Text('Download my CV !'),
+              onPressed: _viewFile,
+            ),
+            const Padding(padding: EdgeInsets.all(10.0)),
+            const Text("En cours De développement !"),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class InfoUser extends StatelessWidget {
+  const InfoUser({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    CollectionReference user = FirebaseFirestore.instance.collection('Users');
+    return FutureBuilder<DocumentSnapshot>(
+      future: user.doc("bUiZ3KHaaIfMaeyGT9RPaxY6KeH2").get(),
+      builder: (context, snapshot) {
+        print(snapshot);
+        if (snapshot.hasError) {
+          return Text("Something went wrong");
+        }
+
+        if (snapshot.hasData && !snapshot.data!.exists) {
+          return Text("Document does not exist");
+        }
+
+        if (snapshot.connectionState == ConnectionState.done) {
+          Map<String, dynamic> data =
+              snapshot.data!.data() as Map<String, dynamic>;
+          return Text("${data['FirstName']} ${data['LastName']}");
+        }
+
+        return const CircularProgressIndicator();
+      },
     );
   }
 }

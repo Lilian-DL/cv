@@ -1,11 +1,12 @@
+// ignore_for_file: file_names
+
 import 'package:cv/Screens/Home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutterfire_ui/auth.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class AuthGate extends StatefulWidget {
-  AuthGate({Key? key}) : super(key: key);
+  const AuthGate({Key? key}) : super(key: key);
 
   @override
   State<AuthGate> createState() => _AuthGateState();
@@ -25,7 +26,8 @@ class _AuthGateState extends State<AuthGate> {
                   padding: EdgeInsets.all(20),
                   child: AspectRatio(
                     aspectRatio: 1,
-                    child: Image(image: AssetImage('images/MyCV.jpg')),
+                    child:
+                        Image(image: AssetImage('web/assets/images/MyCV.jpg')),
                   ),
                 );
               },
@@ -40,7 +42,7 @@ class _AuthGateState extends State<AuthGate> {
 
         // Render your application if authenticated
         return Home(
-          title: "My CV !!",
+          title: "DEMONT LILIAN",
         );
       },
     );

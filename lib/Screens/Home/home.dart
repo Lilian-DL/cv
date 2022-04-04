@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:url_launcher/url_launcher.dart';
 
+// ignore: must_be_immutable
 class Home extends StatefulWidget {
   String title;
   Home({Key? key, required this.title}) : super(key: key);
@@ -20,8 +21,6 @@ class _HomeState extends State<Home> {
     final _url = downloadURL;
     if (await canLaunch(_url)) {
       await launch(_url);
-    } else {
-      print('Something went wrong');
     }
   }
 
@@ -40,51 +39,136 @@ class _HomeState extends State<Home> {
           },
         ),
       ]),
-      body: Center(
-        child: Column(
-          children: [
-            const Padding(padding: EdgeInsets.all(10.0)),
-            const InfoUser(),
-            const Padding(padding: EdgeInsets.all(10.0)),
-            ElevatedButton(
-              child: const Text('Download my CV !'),
-              onPressed: _viewFile,
-            ),
-            const Padding(padding: EdgeInsets.all(10.0)),
-            const Text("En cours De développement !"),
-          ],
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            children: [
+              Flexible(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 20.0, bottom: 20.0),
+                  height: 500,
+                  width: 500,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('web/assets/images/MyCV.jpg'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              buttondoawnload(_viewFile),
+              const Padding(padding: EdgeInsets.only(top: 25, bottom: 25)),
+              const Text(
+                "Mes Projets",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.blue),
+              ),
+              // projetGitHub(),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Projet(id: "Hpn7IpCsxjmXfN6w58DF"),
+                      Projet(id: "KA1LIkuBYc6aSRAaltj4"),
+                      Projet(id: "dDvsC9iKaZcoGN7kqfFh"),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class InfoUser extends StatelessWidget {
-  const InfoUser({Key? key}) : super(key: key);
+Widget buttondoawnload(viewFile) {
+  return SizedBox(
+    height: 40,
+    width: 400,
+    child: ElevatedButton(
+      child: const Text('Vous pouvez télécharger mon CV ici !'),
+      onPressed: viewFile,
+    ),
+  );
+}
+
+// ignore: must_be_immutable
+class Projet extends StatelessWidget {
+  String id;
+  Projet({Key? key, required this.id}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference user = FirebaseFirestore.instance.collection('Users');
+    CollectionReference collection =
+        FirebaseFirestore.instance.collection('Projet');
     return FutureBuilder<DocumentSnapshot>(
-      future: user.doc("bUiZ3KHaaIfMaeyGT9RPaxY6KeH2").get(),
-      builder: (context, snapshot) {
-        print(snapshot);
-        if (snapshot.hasError) {
-          return Text("Something went wrong");
-        }
+        future: collection.doc(id).get(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text("Something went wrong");
+          }
 
-        if (snapshot.hasData && !snapshot.data!.exists) {
-          return Text("Document does not exist");
-        }
+          if (snapshot.hasData && !snapshot.data!.exists) {
+            return const Text("Document does not exist");
+          }
 
-        if (snapshot.connectionState == ConnectionState.done) {
-          Map<String, dynamic> data =
-              snapshot.data!.data() as Map<String, dynamic>;
-          return Text("${data['FirstName']} ${data['LastName']}");
-        }
+          if (snapshot.connectionState == ConnectionState.done) {
+            Map<String, dynamic> data =
+                snapshot.data!.data() as Map<String, dynamic>;
+            return Container(
+              padding: const EdgeInsets.only(
+                left: 50,
+                right: 50,
+                top: 25,
+                bottom: 25,
+              ),
+              margin: const EdgeInsets.only(
+                  left: 50, right: 50, top: 50, bottom: 50),
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("${data['Title']}",
+                      style: const TextStyle(color: Colors.white)),
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  ElevatedButton(
+                    child: const Text('Voir ici!',
+                        style: TextStyle(color: Colors.blue)),
+                    onPressed: () {
+                      _launchURL("${data['Url']}");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
-        return const CircularProgressIndicator();
-      },
-    );
+          return const Text("loading");
+        });
+  }
+}
+
+_launchURL(url) async {
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
 }
